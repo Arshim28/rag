@@ -1,0 +1,20 @@
+mistral:
+  api_key: "${MISTRAL_API_KEY}"
+  ocr_model: "mistral-ocr-v1"
+
+google:
+  api_key: "${GOOGLE_API_KEY}"
+  embedding_model: "gemini-embedding-exp-03-07"
+  generation_model: "gemini-2.0-flash"
+
+database:
+  connection_string: "postgresql+psycopg://langchain:langchain@localhost:6024/langchain"
+  collection_name: "documents_collection"
+
+redis:
+  url: "redis://localhost:6379"
+  index_name: "documents_index"
+
+chunking:
+  max_chunk_size: 8000
+  chunk_overlap: 200

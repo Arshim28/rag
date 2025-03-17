@@ -48,3 +48,5 @@ markdowns/
 # OS-specific
 .DS_Store
 Thumbs.db
+config.yaml
+docker-compose.yml
