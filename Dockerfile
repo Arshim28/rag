@@ -1,7 +1,23 @@
 FROM python:3.13-slim-bookworm AS builder
 
-# Install uv from the official distroless image
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Install build dependencies and Rust/Cargo
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    git \
+    curl \
+    ca-certificates \
+    pkg-config \
+    libssl-dev \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust and Cargo
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install uv using Cargo
+RUN cargo install --git https://github.com/astral-sh/uv uv
 
 WORKDIR /app
 
@@ -9,7 +25,7 @@ WORKDIR /app
 COPY pyproject.toml /app/
 COPY uv.lock /app/
 
-# Install dependencies without installing the project itself
+# Now uv should be available in the PATH
 RUN uv sync --frozen --no-install-project
 
 # Copy application code
@@ -25,14 +41,21 @@ COPY main.py /app/
 # Install the project
 RUN uv sync --frozen
 
-# Final stage
+# Final stage with minimal dependencies
 FROM python:3.13-slim-bookworm
+
+# Install packages needed for runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy uv from builder
+COPY --from=builder /root/.cargo/bin/uv /usr/local/bin/uv
 
 # Copy the application and virtual environment from the builder stage
 COPY --from=builder /app /app
-
-# Set the virtual environment path
-ENV PATH="/app/.venv/bin:$PATH"
+COPY --from=builder /app/.venv /app/.venv
 
 WORKDIR /app
 

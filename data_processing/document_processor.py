@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 from langchain_core.documents import Document
 
-from .mistral_processor import MistralProcessor
-from ..utils.text_chunker import chunk_text
+from data_processing.mistral_processor import MistralProcessor
+from utils.text_chunker import chunk_text
 
 class DocumentProcessor:
     def __init__(self, mistral_processor: MistralProcessor, max_chunk_size: int = 8000, chunk_overlap: int = 200):
